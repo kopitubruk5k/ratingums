@@ -140,6 +140,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $message_type = "success";
             }
         }
+
+        // Hapus Ulasan Massal
+        if ($action == 'hapus_bulk_ulasan') {
+            $ids = $_POST['ids'] ?? [];
+            $ids = array_map('intval', $ids);
+            if (!empty($ids)) {
+                $ids_str = implode(',', $ids);
+                if ($conn->query("DELETE FROM ulasan WHERE id IN ($ids_str)")) {
+                    $message = count($ids) . " ulasan berhasil dihapus!";
+                    $message_type = "success";
+                }
+            } else {
+                $message = "Tidak ada ulasan yang dipilih.";
+                $message_type = "error";
+            }
+        }
+
+        // Hapus Ulasan SDM Rendah Massal
+        if ($action == 'hapus_bulk_ulasan_rendah') {
+            $ids = $_POST['ids'] ?? [];
+            $ids = array_map('intval', $ids);
+            if (!empty($ids)) {
+                $ids_str = implode(',', $ids);
+                if ($conn->query("DELETE FROM ulasan_sdm_rendah WHERE id IN ($ids_str)")) {
+                    $message = count($ids) . " ulasan SDM rendah berhasil dihapus!";
+                    $message_type = "success";
+                }
+            } else {
+                $message = "Tidak ada ulasan yang dipilih.";
+                $message_type = "error";
+            }
+        }
     }
 }
 
@@ -327,39 +359,45 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
         ?>
 
         <?php if ($ulasan_list && $ulasan_list->num_rows > 0): ?>
-        <table class="staff-table" style="width:100%; border-collapse:collapse; margin-bottom:30px;">
-            <thead>
-                <tr>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tenaga</th>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Reviewer</th>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Rating</th>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Komentar</th>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tanggal</th>
-                    <th style="background:#073c64;color:white;padding:10px;text-align:center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php while ($u = $ulasan_list->fetch_assoc()): ?>
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
-                    <td style="padding:10px;color:#ffa600;">
-                        <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
-                        (<?php echo $u['rating']; ?>/5)
-                    </td>
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
-                    <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
-                    <td style="padding:10px;text-align:center;">
-                        <form method="POST" onsubmit="return confirm('Hapus ulasan ini?')">
-                            <input type="hidden" name="action" value="hapus_ulasan">
-                            <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
-                            <button type="submit" style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:13px;">🗑️ Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-            </tbody>
-        </table>
+        <form method="POST" id="form_ulasan" onsubmit="return confirmBulkDelete('ulasan biasa')">
+            <input type="hidden" name="action" value="hapus_bulk_ulasan">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                <label style="font-weight:600; color:#555; cursor:pointer;">
+                    <input type="checkbox" id="selectAll_ulasan" onchange="toggleAll('check_ulasan')" style="margin-right:5px;">
+                    Pilih Semua
+                </label>
+                <button type="submit" style="background:#dc3545;color:white;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-weight:600;">🗑️ Hapus yang Dipilih</button>
+            </div>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:30px; background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr>
+                        <th style="background:#073c64;color:white;padding:10px;width:40px;"></th>
+                        <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tenaga</th>
+                        <th style="background:#073c64;color:white;padding:10px;text-align:left;">Reviewer</th>
+                        <th style="background:#073c64;color:white;padding:10px;text-align:left;">Rating</th>
+                        <th style="background:#073c64;color:white;padding:10px;text-align:left;">Komentar</th>
+                        <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php while ($u = $ulasan_list->fetch_assoc()): ?>
+                    <tr style="border-bottom:1px solid #eee;" class="review-row" onclick="toggleCheck(this)" style="cursor:pointer;">
+                        <td style="padding:10px;text-align:center;" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="ids[]" value="<?php echo $u['id']; ?>" class="check_ulasan" style="width:16px;height:16px;cursor:pointer;">
+                        </td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
+                        <td style="padding:10px;color:#ffa600;">
+                            <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
+                            (<?php echo $u['rating']; ?>/5)
+                        </td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
+                        <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
+                    </tr>
+                <?php endwhile; ?>
+                </tbody>
+            </table>
+        </form>
         <?php else: ?>
             <p style="color:#999; text-align:center; padding:20px;">Tidak ada ulasan.</p>
         <?php endif; ?>
@@ -375,39 +413,45 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
 
         <?php if ($sdm_list && $sdm_list->num_rows > 0): ?>
         <h3 style="color:#dc3545; margin-bottom:10px;">⚠️ Ulasan SDM Rendah</h3>
-        <table class="staff-table" style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tenaga</th>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Reviewer</th>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Rating</th>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Komentar</th>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tanggal</th>
-                    <th style="background:#dc3545;color:white;padding:10px;text-align:center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php while ($u = $sdm_list->fetch_assoc()): ?>
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
-                    <td style="padding:10px;color:#dc3545;">
-                        <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
-                        (<?php echo $u['rating']; ?>/5)
-                    </td>
-                    <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
-                    <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
-                    <td style="padding:10px;text-align:center;">
-                        <form method="POST" onsubmit="return confirm('Hapus ulasan SDM rendah ini?')">
-                            <input type="hidden" name="action" value="hapus_ulasan_rendah">
-                            <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
-                            <button type="submit" style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:13px;">🗑️ Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-            </tbody>
-        </table>
+        <form method="POST" id="form_sdm" onsubmit="return confirmBulkDelete('ulasan SDM rendah')">
+            <input type="hidden" name="action" value="hapus_bulk_ulasan_rendah">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                <label style="font-weight:600; color:#555; cursor:pointer;">
+                    <input type="checkbox" id="selectAll_sdm" onchange="toggleAll('check_sdm')" style="margin-right:5px;">
+                    Pilih Semua
+                </label>
+                <button type="submit" style="background:#dc3545;color:white;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-weight:600;">🗑️ Hapus yang Dipilih</button>
+            </div>
+            <table style="width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr>
+                        <th style="background:#dc3545;color:white;padding:10px;width:40px;"></th>
+                        <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tenaga</th>
+                        <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Reviewer</th>
+                        <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Rating</th>
+                        <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Komentar</th>
+                        <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php while ($u = $sdm_list->fetch_assoc()): ?>
+                    <tr style="border-bottom:1px solid #eee;" onclick="toggleCheck(this)" style="cursor:pointer;">
+                        <td style="padding:10px;text-align:center;" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="ids[]" value="<?php echo $u['id']; ?>" class="check_sdm" style="width:16px;height:16px;cursor:pointer;">
+                        </td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
+                        <td style="padding:10px;color:#dc3545;">
+                            <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
+                            (<?php echo $u['rating']; ?>/5)
+                        </td>
+                        <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
+                        <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
+                    </tr>
+                <?php endwhile; ?>
+                </tbody>
+            </table>
+        </form>
         <?php endif; ?>
     </div>
 
@@ -423,6 +467,30 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
     </div>
 
     <script>
+        // Ceklist: pilih semua / batalkan semua
+        function toggleAll(className) {
+            const checkboxes = document.querySelectorAll('.' + className);
+            const selectAll = event.target;
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        // Klik baris = toggle ceklist
+        function toggleCheck(row) {
+            const cb = row.querySelector('input[type="checkbox"]');
+            if (cb) cb.checked = !cb.checked;
+        }
+
+        // Konfirmasi sebelum hapus massal
+        function confirmBulkDelete(tipe) {
+            const form = event.target;
+            const checked = form.querySelectorAll('input[type="checkbox"][name="ids[]"]:checked');
+            if (checked.length === 0) {
+                alert('Pilih minimal satu ulasan terlebih dahulu!');
+                return false;
+            }
+            return confirm('Hapus ' + checked.length + ' ' + tipe + ' yang dipilih?');
+        }
+
         function openEditModal(id, nama, jabatan) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nama').value = nama;

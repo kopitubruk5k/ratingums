@@ -45,7 +45,7 @@ function displayStars($rating) {
         .staff-table td{padding:15px;vertical-align:middle;border-bottom:1px solid #eee;}
         .staff-table tr:last-child td{border-bottom:none;}
         .staff-table tr:hover{background:#f9f9f9;}
-        .staff-photo{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #0170B9;}
+        .staff-photo{width:110px;height:110px;border-radius:0;object-fit:cover;border:none;}
         .stars{font-size:1.2em;color:#ffa600;}
         .star.empty{color:#ddd;}
         .rating-text{font-size:0.85em;color:#666;margin-top:3px;}

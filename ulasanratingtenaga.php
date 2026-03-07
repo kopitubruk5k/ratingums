@@ -123,7 +123,7 @@ function displayStars($rating) {
     ?>
     <div class="staff-profile">
         <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
-            <img src="<?php echo $foto_src; ?>" alt="Foto <?php echo htmlspecialchars($staff['nama']); ?>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #667eea;" onerror="this.src='https://via.placeholder.com/80x80?text=No+Photo'">
+            <img src="<?php echo $foto_src; ?>" alt="Foto <?php echo htmlspecialchars($staff['nama']); ?>" style="width:110px;height:110px;border-radius:0;object-fit:cover;" onerror="this.src='https://via.placeholder.com/110x110?text=No+Photo'">
             <div>
                 <h2><?php echo htmlspecialchars($staff['nama']); ?></h2>
                 <div class="jabatan"><?php echo htmlspecialchars($staff['jabatan']); ?></div>

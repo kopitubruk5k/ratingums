@@ -125,9 +125,9 @@ body{
     flex:1;
 }
 .staff-avatar{
-    width:120px;
-    height:120px;
-    border-radius:8px;
+    width:110px;
+    height:110px;
+    border-radius:0;
     background:#e0e0e0;
     display:flex;
     align-items:center;
@@ -138,7 +138,7 @@ body{
     overflow:hidden;
     flex-shrink:0;
     align-self:flex-start;
-    border:2px solid #ddd;
+    border:none;
 }
 .staff-avatar img{
     width:100%;

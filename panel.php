@@ -138,7 +138,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
         .staff-table th { background-color: #073c64; color: white; }
         .staff-table tr:hover { background: #f8f9fa; }
         
-        .staff-foto { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 3px solid #667eea; }
+        .staff-foto { width: 110px; height: 110px; border-radius: 0; object-fit: cover; border: none; }
         .no-foto { width: 80px; height: 80px; border-radius: 8px; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 12px; }
         
         .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; transition: all 0.3s; }

@@ -1,5 +1,19 @@
 <?php
+session_start();
 include 'config.php';
+
+// Cek login admin
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header("Location: login.php");
+    exit();
+}
+
+// Logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
 
 $message = '';
 $message_type = '';
@@ -177,8 +191,12 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <h1>PANEL ADMIN - KELOLA TENAGA KEPENDIDIKAN</h1>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span style="font-size:0.85em; opacity:0.85;">👤 <?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
+            <a href="?logout=1" style="background:#dc3545; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:0.9em; font-weight:600;" onclick="return confirm('Yakin ingin logout?')">🚪 Logout</a>
+        </div>
     </div>
 
     <div class="panel-container">

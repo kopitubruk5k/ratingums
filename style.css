@@ -1,0 +1,644 @@
+/* Style untuk RatingUMS - Daftar Tenaga Kependidikan */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.header {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #000000 0%, #000000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    margin: 10px 0 0 0;
+    font-size: 1.1em;
+    opacity: 0.8;
+}
+
+.staff-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.staff-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.staff-name {
+    font-size: 1.8em;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.staff-info {
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.staff-info strong {
+    color: #555;
+}
+
+.rating {
+    font-size: 1.2em;
+    color: #ffa600fb;
+    margin-bottom: 15px;
+    background: rgba(255, 235, 59, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.reviews {
+    margin-top: 25px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+}
+
+.reviews h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.review {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+    margin-top: 15px;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.review:first-child {
+    border-top: none;
+    margin-top: 0;
+}
+
+.review-author {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.review-rating {
+    color: #ffd700;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.review small {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.no-reviews {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+}
+
+/* Form styling */
+.add-review {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid #667eea;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.add-review h4 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Star rating selector */
+.star-rating {
+    display: flex;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2em;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    user-select: none;
+}
+
+/* Active state (selected stars) */
+.star-rating label.active {
+    color: #ffd700;
+}
+
+/* Hover state */
+.star-rating label.hover {
+    color: #ffd700;
+}
+
+/* Fallback for CSS-only version (if JavaScript fails) */
+.star-rating input:nth-child(1):checked~label:nth-child(1),
+.star-rating input:nth-child(2):checked~label:nth-child(1),
+.star-rating input:nth-child(2):checked~label:nth-child(2),
+.star-rating input:nth-child(3):checked~label:nth-child(1),
+.star-rating input:nth-child(3):checked~label:nth-child(2),
+.star-rating input:nth-child(3):checked~label:nth-child(3),
+.star-rating input:nth-child(4):checked~label:nth-child(1),
+.star-rating input:nth-child(4):checked~label:nth-child(2),
+.star-rating input:nth-child(4):checked~label:nth-child(3),
+.star-rating input:nth-child(4):checked~label:nth-child(4),
+.star-rating input:nth-child(5):checked~label:nth-child(1),
+.star-rating input:nth-child(5):checked~label:nth-child(2),
+.star-rating input:nth-child(5):checked~label:nth-child(3),
+.star-rating input:nth-child(5):checked~label:nth-child(4),
+.star-rating input:nth-child(5):checked~label:nth-child(5) {
+    color: #ffd700;
+}
+
+.submit-btn {
+    background-color: #073c64;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(7, 60, 100, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Message styling */
+.message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Improve spacing */
+.rating {
+    margin-bottom: 25px;
+}
+
+.reviews {
+    margin-top: 30px;
+}
+
+/* Link to view all reviews */
+.view-all-reviews {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.view-all-reviews a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-all-reviews a:hover {
+    background-color: #667eea;
+    color: white;
+}
+
+/* Back link in ulasan.php */
+.back-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.back-link:hover {
+    background-color: #667eea;
+    color: white;
+}
+
+/* Filters in ulasan.php */
+.filters {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filters label {
+    font-weight: 600;
+    color: #555;
+    margin-right: 10px;
+}
+
+.filters select {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.filters select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.filters button {
+    background-color: #073c64;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filters button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(7, 60, 100, 0.3);
+}
+
+/* Reviews container in ulasan.php */
+.reviews-container {
+    display: grid;
+    gap: 20px;
+}
+
+/* Review card in ulasan.php */
+.review-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.staff-avatar {
+    margin-right: 15px;
+}
+
+.staff-avatar img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 3px solid #667eea;
+    object-fit: cover;
+}
+
+.staff-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.staff-info {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.review-author {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.review-comment {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Bottom links in ulasan.php */
+.bottom-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.link-box {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 10px 15px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.link-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.link-box a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    text-align: center;
+}
+
+.link-box a:hover {
+    color: #073c64;
+}
+
+.right-align {
+    text-align: right;
+}
+
+/* Back link container in sdmrendah.php */
+.back-link-container {
+    text-align: right;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+/* Export Section */
+.export-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.export-title {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.export-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: none;
+    font-family: inherit;
+}
+
+.export-btn-csv {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.export-btn-csv:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.export-btn-excel {
+    background: linear-gradient(135deg, #073c64, #1a6fb5);
+    color: white;
+    box-shadow: 0 4px 15px rgba(7, 60, 100, 0.3);
+}
+
+.export-btn-excel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(7, 60, 100, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-icon {
+    font-size: 1.2em;
+}
+
+.export-label {
+    letter-spacing: 0.3px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .header {
+        padding: 20px;
+        position: relative;
+    }
+
+    .header h1 {
+        font-size: 2em;
+    }
+
+    .staff-card {
+        padding: 20px;
+    }
+
+    .staff-name {
+        font-size: 1.5em;
+    }
+
+    .add-review {
+        padding: 20px;
+    }
+
+    .star-rating label {
+        font-size: 1.8em;
+    }
+
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters select,
+    .filters button {
+        width: 100%;
+    }
+
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .bottom-links {
+        position: static;
+        margin-top: 30px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .link-box {
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .export-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .export-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .export-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 130px;
+    }
+}

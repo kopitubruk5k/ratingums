@@ -122,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $message = "Data berhasil dihapus!";
                 $message_type = "success";
             }
+        }
         // Hapus Ulasan
         if ($action == 'hapus_ulasan') {
             $id = intval($_POST['id']);

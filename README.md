@@ -89,7 +89,10 @@ Beberapa fitur yang bisa ditambahkan:
 ## Lisensi
 
 Proyek ini dibuat untuk keperluan edukasi dan dapat dimodifikasi sesuai kebutuhan.
+Deployed by Muhammad Mus'ab.
 
 ## Kontak
 
-Untuk pertanyaan atau dukungan, silakan hubungi tim pengembang.
+Untuk pertanyaan atau dukungan, silakan hubungi tim pengembang:
+- Email: mm240@ums.ac.id
+- Instagram: [@msb.muss](https://instagram.com/msb.muss)

@@ -108,6 +108,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $message = "Data berhasil dihapus!";
                 $message_type = "success";
             }
+        // Hapus Ulasan
+        if ($action == 'hapus_ulasan') {
+            $id = intval($_POST['id']);
+            if ($conn->query("DELETE FROM ulasan WHERE id = $id")) {
+                $message = "Ulasan berhasil dihapus!";
+                $message_type = "success";
+            }
+        }
+
+        // Hapus Ulasan SDM Rendah
+        if ($action == 'hapus_ulasan_rendah') {
+            $id = intval($_POST['id']);
+            if ($conn->query("DELETE FROM ulasan_sdm_rendah WHERE id = $id")) {
+                $message = "Ulasan SDM rendah berhasil dihapus!";
+                $message_type = "success";
+            }
         }
     }
 }
@@ -276,6 +292,104 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Section Kelola Ulasan -->
+    <div class="panel-container" style="margin-top: 30px;">
+        <h2 style="color:#073c64; border-bottom: 2px solid #073c64; padding-bottom: 10px; margin-bottom: 20px;">🗑️ Kelola Ulasan</h2>
+
+        <?php
+        $ulasan_list = $conn->query("
+            SELECT u.id, u.nama_reviewer, u.rating, u.komentar, u.tanggal, tk.nama as staff_nama
+            FROM ulasan u
+            JOIN tenaga_kependidikan tk ON u.tenaga_id = tk.id
+            ORDER BY u.tanggal DESC
+        ");
+        ?>
+
+        <?php if ($ulasan_list && $ulasan_list->num_rows > 0): ?>
+        <table class="staff-table" style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+            <thead>
+                <tr>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tenaga</th>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Reviewer</th>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Rating</th>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Komentar</th>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:left;">Tanggal</th>
+                    <th style="background:#073c64;color:white;padding:10px;text-align:center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php while ($u = $ulasan_list->fetch_assoc()): ?>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
+                    <td style="padding:10px;color:#ffa600;">
+                        <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
+                        (<?php echo $u['rating']; ?>/5)
+                    </td>
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
+                    <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
+                    <td style="padding:10px;text-align:center;">
+                        <form method="POST" onsubmit="return confirm('Hapus ulasan ini?')">
+                            <input type="hidden" name="action" value="hapus_ulasan">
+                            <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
+                            <button type="submit" style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:13px;">🗑️ Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p style="color:#999; text-align:center; padding:20px;">Tidak ada ulasan.</p>
+        <?php endif; ?>
+
+        <?php
+        $sdm_list = $conn->query("
+            SELECT u.id, u.nama_reviewer, u.rating, u.komentar, u.tanggal, tk.nama as staff_nama
+            FROM ulasan_sdm_rendah u
+            JOIN tenaga_kependidikan tk ON u.tenaga_id = tk.id
+            ORDER BY u.tanggal DESC
+        ");
+        ?>
+
+        <?php if ($sdm_list && $sdm_list->num_rows > 0): ?>
+        <h3 style="color:#dc3545; margin-bottom:10px;">⚠️ Ulasan SDM Rendah</h3>
+        <table class="staff-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tenaga</th>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Reviewer</th>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Rating</th>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Komentar</th>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:left;">Tanggal</th>
+                    <th style="background:#dc3545;color:white;padding:10px;text-align:center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php while ($u = $sdm_list->fetch_assoc()): ?>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['staff_nama']); ?></td>
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['nama_reviewer']); ?></td>
+                    <td style="padding:10px;color:#dc3545;">
+                        <?php echo str_repeat('★', $u['rating']) . str_repeat('☆', 5 - $u['rating']); ?>
+                        (<?php echo $u['rating']; ?>/5)
+                    </td>
+                    <td style="padding:10px;"><?php echo htmlspecialchars($u['komentar']); ?></td>
+                    <td style="padding:10px; font-size:0.85em; color:#666;"><?php echo date('d M Y H:i', strtotime($u['tanggal'])); ?></td>
+                    <td style="padding:10px;text-align:center;">
+                        <form method="POST" onsubmit="return confirm('Hapus ulasan SDM rendah ini?')">
+                            <input type="hidden" name="action" value="hapus_ulasan_rendah">
+                            <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
+                            <button type="submit" style="background:#dc3545;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:13px;">🗑️ Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
     </div>
 
     <!-- Modal Preview Foto -->

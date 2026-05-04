@@ -2,7 +2,14 @@
 include 'config.php';
 
 // Daftar kata-kata tidak pantas
-$badWords = ['fuck', 'shit', 'anjing', 'asu', 'babi', 'kontol', 'bangsat', 'badjingan', 'nyenuk', 'ngentod', 'memek', 'tolol', 'goblok', 'nigger', 'pussy', 'asshole', 'bitch', 'bastard', 'cunt', 'damn', 'hell', 'piss', 'dick', 'cock', 'faggot', 'slut', 'whore'];
+$badWords = [
+    // Inggris
+    'fuck', 'shit', 'pussy', 'asshole', 'bitch', 'bastard', 'cunt', 'dick', 'cock', 'faggot', 'slut', 'whore', 'nigger', 'damn', 'hell', 'piss',
+    // Indonesia umum
+    'anjing', 'babi', 'kontol', 'bangsat', 'memek', 'ngentod', 'tolol', 'goblok', 'idiot', 'bodoh', 'brengsek', 'keparat', 'sialan', 'bajingan', 'badjingan', 'tai', 'tahi', 'setan', 'iblis', 'laknat', 'kurang ajar',
+    // Jawa / gaul
+    'jancok', 'dancok', 'cok', 'cuk', 'jancuk', 'asu', 'nyenuk', 'matamu', 'dikutuk', 'kampret', 'semprul', 'mbahmu', 'rai gedhe', 'bathang', 'keplak',
+];
 
 function containsBadWords($text, $badWords) {
     $text = strtolower($text);
@@ -22,10 +29,14 @@ if ($id <= 0) {
 // Proses submit ulasan
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     $reviewer_name = trim($_POST['reviewer_name']);
+    // Jika nama kosong, simpan sebagai "Anonim"
+    if (empty($reviewer_name)) {
+        $reviewer_name = 'Anonim';
+    }
     $rating = intval($_POST['rating']);
     $comment = trim($_POST['comment']);
 
-    if (!empty($reviewer_name) && $rating >= 1 && $rating <= 5 && !empty($comment)) {
+    if ($rating >= 1 && $rating <= 5 && !empty($comment)) {
         $table = containsBadWords($comment, $badWords) ? 'ulasan_sdm_rendah' : 'ulasan';
         $stmt = $conn->prepare("INSERT INTO $table (tenaga_id, nama_reviewer, rating, komentar) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("isis", $id, $reviewer_name, $rating, $comment);
@@ -36,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
         }
         $stmt->close();
     } else {
-        $error_message = "Harap isi semua field dengan benar.";
+        $error_message = "Harap isi rating dan komentar dengan benar.";
     }
 }
 
@@ -94,7 +105,8 @@ function displayStars($rating) {
         .reviews-section { margin-top: 30px; }
         .reviews-section h3 { color: #2c3e50; margin-bottom: 20px; }
         .review-item { background: rgba(255,255,255,0.95); border-radius: 10px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .review-item .reviewer { font-weight: 600; color: #667eea; }
+        .review-item .reviewer { font-weight: 600; color: #667eea; display: flex; align-items: center; gap: 6px; }
+        .review-item .reviewer .anon-badge { background: #f0f4ff; border: 1px solid #c7d4ff; color: #667eea; font-size: 0.75em; padding: 2px 8px; border-radius: 20px; font-weight: 500; cursor: help; }
         .review-item .review-stars { color: #ffa600; margin: 8px 0; }
         .review-item .comment { color: #555; line-height: 1.6; }
         .review-item .date { color: #999; font-size: 0.85em; margin-top: 10px; }
@@ -145,8 +157,8 @@ function displayStars($rating) {
             <h4>Beri Ulasan:</h4>
             <form method="POST">
                 <div class="form-group">
-                    <label for="reviewer_name">Nama Anda:</label>
-                    <input type="text" id="reviewer_name" name="reviewer_name" required>
+                    <label for="reviewer_name">Nama Anda: <span style="font-size:0.82em;color:#aaa;font-weight:400;">(Opsional)</span></label>
+                    <input type="text" id="reviewer_name" name="reviewer_name" placeholder="Kosongkan untuk tetap anonim">
                 </div>
                 <div class="form-group">
                     <label>Rating:</label>
@@ -172,7 +184,10 @@ function displayStars($rating) {
         <?php if ($reviews->num_rows > 0): ?>
             <?php while ($review = $reviews->fetch_assoc()): ?>
                 <div class="review-item">
-                    <div class="reviewer"><?php echo htmlspecialchars($review['nama_reviewer']); ?></div>
+                    <div class="reviewer">
+                        🙍 Pengguna Anonim
+                        <span class="anon-badge" title="Nama reviewer disembunyikan untuk menjaga privasi">🔒 Privasi</span>
+                    </div>
                     <div class="review-stars"><?php echo displayStars($review['rating']); ?></div>
                     <div class="comment"><?php echo nl2br(htmlspecialchars($review['komentar'])); ?></div>
                     <div class="date"><?php echo date('d M Y, H:i', strtotime($review['tanggal'])); ?></div>
@@ -206,5 +221,6 @@ function displayStars($rating) {
     </script>
 
     <?php closeConnection(); ?>
+<?php include 'footer.php'; ?>
 </body>
 </html>

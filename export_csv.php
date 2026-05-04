@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_check.php';
 include 'config.php';
 
 // Function to display stars

@@ -150,9 +150,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($conn->query("DELETE FROM ulasan WHERE id IN ($ids_str)")) {
                     $message = count($ids) . " ulasan berhasil dihapus!";
                     $message_type = "success";
+                } else {
+                    $message = "Gagal hapus ulasan! Error DB: " . $conn->error . " | IDs: " . $ids_str;
+                    $message_type = "error";
                 }
             } else {
-                $message = "Tidak ada ulasan yang dipilih.";
+                $ids_raw = $_POST['ids'] ?? 'tidak ada data ids';
+                $message = "Tidak ada ulasan yang dipilih. (POST ids = " . print_r($ids_raw, true) . ", POST action = " . ($_POST['action'] ?? '-') . ")";
                 $message_type = "error";
             }
         }
@@ -166,9 +170,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($conn->query("DELETE FROM ulasan_sdm_rendah WHERE id IN ($ids_str)")) {
                     $message = count($ids) . " ulasan SDM rendah berhasil dihapus!";
                     $message_type = "success";
+                } else {
+                    $message = "Gagal hapus ulasan SDM rendah! Error DB: " . $conn->error . " | IDs: " . $ids_str;
+                    $message_type = "error";
                 }
             } else {
-                $message = "Tidak ada ulasan yang dipilih.";
+                $ids_raw = $_POST['ids'] ?? 'tidak ada data ids';
+                $message = "Tidak ada ulasan SDM yang dipilih. (POST ids = " . print_r($ids_raw, true) . ", POST action = " . ($_POST['action'] ?? '-') . ")";
                 $message_type = "error";
             }
         }
@@ -176,7 +184,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Ambil semua data tenaga
-$tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC");
+$check_col = $conn->query("SHOW COLUMNS FROM tenaga_kependidikan LIKE 'urutan'");
+if ($check_col && $check_col->num_rows == 0) {
+    $conn->query("ALTER TABLE tenaga_kependidikan ADD urutan INT DEFAULT 0;");
+}
+$tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY urutan ASC, id ASC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -221,7 +233,12 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
         
         .back-link-container { text-align: center; margin-top: 30px; }
+        .drag-handle { cursor: grab; font-size: 20px; color: #999; padding-right: 10px; user-select: none; }
+        .drag-handle:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.4; background-color: #f0f0f0; }
     </style>
+    <!-- Tambahkan SortableJS untuk Drag and Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
     <div class="header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -266,15 +283,19 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="sortable-staff">
                 <?php while ($row = $tenaga_list->fetch_assoc()): ?>
-                <tr>
+                <tr data-id="<?php echo $row['id']; ?>">
                     <td>
+                        <div style="display:flex; align-items:center;">
+                            <span class="drag-handle" title="Tarik untuk mengurutkan">☰</span>
+
                         <?php if ($row['foto'] && file_exists($row['foto'])): ?>
                             <img src="<?php echo htmlspecialchars($row['foto']); ?>" class="staff-foto" alt="Foto" onclick="openPreviewModal('<?php echo htmlspecialchars($row['foto']); ?>', '<?php echo addslashes($row['nama']); ?>')" style="cursor:pointer;" title="Klik untuk preview">
                         <?php else: ?>
                             <div class="no-foto">No Foto</div>
                         <?php endif; ?>
+                        </div>
                     </td>
                     <td><?php echo htmlspecialchars($row['nama']); ?></td>
                     <td><?php echo htmlspecialchars($row['jabatan']); ?></td>
@@ -359,7 +380,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
         ?>
 
         <?php if ($ulasan_list && $ulasan_list->num_rows > 0): ?>
-        <form method="POST" id="form_ulasan" onsubmit="return confirmBulkDelete('ulasan biasa')">
+        <form method="POST" id="form_ulasan" onsubmit="return confirmBulkDelete(this, 'ulasan biasa')">
             <input type="hidden" name="action" value="hapus_bulk_ulasan">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                 <label style="font-weight:600; color:#555; cursor:pointer;">
@@ -381,7 +402,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
                 </thead>
                 <tbody>
                 <?php while ($u = $ulasan_list->fetch_assoc()): ?>
-                    <tr style="border-bottom:1px solid #eee;" class="review-row" onclick="toggleCheck(this)" style="cursor:pointer;">
+                    <tr style="border-bottom:1px solid #eee; cursor:pointer;" class="review-row" onclick="toggleCheck(this)">
                         <td style="padding:10px;text-align:center;" onclick="event.stopPropagation()">
                             <input type="checkbox" name="ids[]" value="<?php echo $u['id']; ?>" class="check_ulasan" style="width:16px;height:16px;cursor:pointer;">
                         </td>
@@ -413,7 +434,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
 
         <?php if ($sdm_list && $sdm_list->num_rows > 0): ?>
         <h3 style="color:#dc3545; margin-bottom:10px;">⚠️ Ulasan SDM Rendah</h3>
-        <form method="POST" id="form_sdm" onsubmit="return confirmBulkDelete('ulasan SDM rendah')">
+        <form method="POST" id="form_sdm" onsubmit="return confirmBulkDelete(this, 'ulasan SDM rendah')">
             <input type="hidden" name="action" value="hapus_bulk_ulasan_rendah">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                 <label style="font-weight:600; color:#555; cursor:pointer;">
@@ -435,7 +456,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
                 </thead>
                 <tbody>
                 <?php while ($u = $sdm_list->fetch_assoc()): ?>
-                    <tr style="border-bottom:1px solid #eee;" onclick="toggleCheck(this)" style="cursor:pointer;">
+                    <tr style="border-bottom:1px solid #eee; cursor:pointer;" onclick="toggleCheck(this)">
                         <td style="padding:10px;text-align:center;" onclick="event.stopPropagation()">
                             <input type="checkbox" name="ids[]" value="<?php echo $u['id']; ?>" class="check_sdm" style="width:16px;height:16px;cursor:pointer;">
                         </td>
@@ -481,8 +502,7 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
         }
 
         // Konfirmasi sebelum hapus massal
-        function confirmBulkDelete(tipe) {
-            const form = event.target;
+        function confirmBulkDelete(form, tipe) {
             const checked = form.querySelectorAll('input[type="checkbox"][name="ids[]"]:checked');
             if (checked.length === 0) {
                 alert('Pilih minimal satu ulasan terlebih dahulu!');
@@ -521,8 +541,50 @@ $tenaga_list = $conn->query("SELECT * FROM tenaga_kependidikan ORDER BY nama ASC
                 }
             });
         });
+
+        // Initialize Sortable
+        document.addEventListener('DOMContentLoaded', function() {
+            var el = document.getElementById('sortable-staff');
+            var sortable = Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    var items = el.querySelectorAll('tr');
+                    var order = [];
+                    items.forEach(function(row) {
+                        order.push(row.getAttribute('data-id'));
+                    });
+                    
+                    // Simpan urutan ke database via AJAX
+                    var formData = new FormData();
+                    order.forEach(function(id) {
+                        formData.append('order[]', id);
+                    });
+                    
+                    fetch('update_urutan.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Tampilkan notifikasi kecil jika perlu (opsional)
+                            console.log('Urutan berhasil disimpan');
+                        } else {
+                            alert('Gagal menyimpan urutan: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menyimpan urutan.');
+                    });
+                }
+            });
+        });
     </script>
 
     <?php closeConnection(); ?>
+    <?php include 'footer.php'; ?>
 </body>
 </html>

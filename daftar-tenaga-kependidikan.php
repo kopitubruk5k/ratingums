@@ -1,3 +1,48 @@
+<?php
+include_once dirname(__FILE__) . '/config.php';
+
+// Ambil semua data tenaga kependidikan beserta rating dari database
+$ratings_by_name = [];
+$rat_query = "
+    SELECT tk.nama,
+           COALESCE(AVG(u.rating), 0) as avg_rating,
+           COUNT(u.id) as total_ulasan,
+           tk.id as staff_id
+    FROM tenaga_kependidikan tk
+    LEFT JOIN ulasan u ON u.tenaga_id = tk.id
+    GROUP BY tk.id
+";
+$rat_result = $conn->query($rat_query);
+if ($rat_result) {
+    while ($row = $rat_result->fetch_assoc()) {
+        // Index by lowercase name for matching
+        $ratings_by_name[strtolower(trim($row['nama']))] = $row;
+    }
+}
+
+function displayStarsSimple($rating) {
+    $rounded = round($rating);
+    $stars = '';
+    for ($i = 1; $i <= 5; $i++) {
+        $stars .= ($i <= $rounded)
+            ? '<span style="color:#ffa600;">&#9733;</span>'
+            : '<span style="color:#ddd;">&#9734;</span>';
+    }
+    return $stars;
+}
+
+function getStaffRating($name, $ratings) {
+    $key = strtolower(trim($name));
+    if (isset($ratings[$key])) return $ratings[$key];
+    // Partial match - cari yang mengandung nama ini
+    foreach ($ratings as $k => $v) {
+        if (strpos($k, $key) !== false || strpos($key, $k) !== false) {
+            return $v;
+        }
+    }
+    return null;
+}
+?>
 <html lang="id-ID"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -215,216 +260,75 @@ var wpdm_strings = {"pass_var":"Password Verified!","pass_var_q":"Please click f
 			<div class="elementor-widget-wrap elementor-element-populated">
 						<div class="elementor-element elementor-element-d47e89e elementor-widget__width-initial elementor-widget elementor-widget-text-editor" data-id="d47e89e" data-element_type="widget" data-widget_type="text-editor.default">
 				<div class="elementor-widget-container">
-									<div class="daftar-staf">
+					<?php
+// ── CSS tambahan untuk bintang dan tombol ulasan ──────────────────
+echo '<style>
+.daftar-staf { display:flex; flex-wrap:wrap; gap:18px; }
+.staf {
+    background:#fff; border-radius:12px; padding:18px 20px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.09);
+    flex:1 1 260px; min-width:230px; max-width:340px;
+    transition:transform 0.2s, box-shadow 0.2s;
+}
+.staf:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.13); }
+.staf h3 { color:#073c64; margin-bottom:6px; font-size:0.95em; }
+.staf p { color:#555; font-size:0.88em; line-height:1.65; margin-bottom:8px; }
+.staf-stars { font-size:1.15em; letter-spacing:1px; }
+.staf-rating-text { font-size:0.78em; color:#888; margin-left:4px; }
+.btn-staf-ulasan {
+    display:inline-block; margin-top:8px;
+    padding:5px 12px; background:#073c64; color:#fff;
+    text-decoration:none; border-radius:5px;
+    font-size:0.80em; font-weight:600;
+    transition:background 0.2s;
+}
+.btn-staf-ulasan:hover { background:#0a4f85; }
+</style>';
 
+// ── Loop dari database ────────────────────────────────────────────
+$all_query = "
+    SELECT tk.*,
+           COALESCE(AVG(u.rating), 0) as avg_rating,
+           COUNT(u.id) as total_ulasan
+    FROM tenaga_kependidikan tk
+    LEFT JOIN ulasan u ON u.tenaga_id = tk.id
+    GROUP BY tk.id
+    ORDER BY tk.id ASC
+";
+$all_result = $conn->query($all_query);
+if ($all_result && $all_result->num_rows > 0):
+?>
+<div class="daftar-staf">
+<?php while ($staf = $all_result->fetch_assoc()): ?>
   <div class="staf">
-    <h3><strong>Kasubag Tata Usaha</strong></h3>
+    <h3><strong><?php echo htmlspecialchars($staf['jabatan']); ?></strong></h3>
     <p>
-      Murdayanto, S.Kom<br>
-      NIK: 1133<br>
-      murdayanto@ums.ac.id
+      <?php echo htmlspecialchars($staf['nama']); ?><br>
+      NIK: <?php echo htmlspecialchars($staf['nik']); ?><br>
+      <?php if (!empty($staf['email'])): ?>
+        <?php echo htmlspecialchars($staf['email']); ?>
+      <?php endif; ?>
     </p>
+    <div>
+      <span class="staf-stars"><?php echo displayStarsSimple($staf['avg_rating']); ?></span>
+      <span class="staf-rating-text">
+        <?php if ($staf['total_ulasan'] > 0): ?>
+          <?php echo number_format($staf['avg_rating'], 1); ?>/5
+          (<?php echo $staf['total_ulasan']; ?> ulasan)
+        <?php else: ?>
+          Belum ada ulasan
+        <?php endif; ?>
+      </span>
+    </div>
+    <a href="ulasanratingtenaga.php?id=<?php echo $staf['id']; ?>" class="btn-staf-ulasan">⭐ Beri Ulasan</a>
   </div>
-
-  <div class="staf">
-    <h3><strong>Kaur Keuangan & Akuntansi</strong></h3>
-    <p>
-      Baroroh Rina T., S.Psi.<br>
-      NIK: 1138<br>
-      brt223@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Kaur Akademik</strong></h3>
-    <p>
-      Pudjianto, S.Pd.<br>
-      NIK: 1153<br>
-      pud101@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Kaur Umum & Sarpras</strong></h3>
-    <p>
-      Mulyanto<br>
-      NIK: 1272<br>
-      mul298@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Keuangan</strong></h3>
-    <p>
-      Djoko Sardjono, S.E.<br>
-      NIK: 1834<br>
-      ds738@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Keuangan</strong></h3>
-    <p>
-      Muhammad Syaifudin Bachtiar, S.Pd.<br>
-      NIK: 1979<br>
-      msb181@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Keuangan</strong></h3>
-    <p>
-      Nur Annisa Novia Fauziah, S.Ak<br>
-      NIK: 2094<br>
-      nan284@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Komputer</strong></h3>
-    <p>
-      M. Rahadian, S.Kom<br>
-      NIK: 1884<br>
-      mr561@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Lab. Pembelajaran Terintegrasi</strong></h3>
-    <p>
-      Jarot Wiryatmoko, S.Pd.<br>
-      NIK: 1866<br>
-      jw725@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Lab. Pembelajaran Terintegrasi</strong></h3>
-    <p>
-      Lilis Setiawati, A.Ma.Pust.<br>
-      NIK: 1844<br>
-      ls170@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Unit Penjaminan Mutu</strong></h3>
-    <p>
-      Ainun Rahma Firdausy, S.Pd., M.Pd<br>
-      NIK: 2108<br>
-      arf549@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Tata Usaha</strong></h3>
-    <p>
-      Sugiman<br>
-      NIK: 939<br>
-      sug222@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Tata Usaha</strong></h3>
-    <p>
-      Suharno<br>
-      NIK: 1020<br>
-      suh255@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Tata Usaha</strong></h3>
-    <p>
-      Suratman<br>
-      NIK: 1023<br>
-      sur245@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Tata Usaha</strong></h3>
-    <p>
-      Arifin Sri Hascaryo, S.E<br>
-      NIK: 2103<br>
-      ash308@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Tata Usaha</strong></h3>
-    <p>
-      Arief Rahman Hanif, S.I.Kom<br>
-      NIK: 2106<br>
-      arh503@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Pendidikan Profesi Guru</strong></h3>
-    <p>
-      Afif Jauhari, S.E.<br>
-      NIK: 1889<br>
-      aj716@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Komputer</strong></h3>
-    <p>
-      Zuhdi Fatkhurrahman, S.Kom<br>
-      NIK: 2115<br>
-      zf806@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Staf Lab. Pendidikan Matematika</strong></h3>
-    <p>
-      Hirtanto, S.Pd., M.Pd.<br>
-      NIK: 1900<br>
-      hir634@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Pendidikan Biologi</strong></h3>
-    <p>
-      Rivky Arif Rahmat, S.Pd., M.Pd.<br>
-      NIK: 500.2165<br>
-      rar883@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Kosmografi Pendidikan Geografi</strong></h3>
-    <p>
-      Ayu Fatonah, S.Pd<br>
-      NIK: 2121<br>
-      af142@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Pendidikan Teknik Informatika</strong></h3>
-    <p>
-      Muhammad Mus’ab, S.Pd.<br>
-      NIK: 2254<br>
-      mm240@ums.ac.id
-    </p>
-  </div>
-
-  <div class="staf">
-    <h3><strong>Laboran Pendidikan Olahraga</strong></h3>
-    <p>
-      Fathurrahman, S.Pd.<br>
-      NIK: 2256<br>
-      fat113@ums.ac.id
-    </p>
-  </div>
-
+<?php endwhile; ?>
 </div>
+<?php else: ?>
+<div class="daftar-staf">
+  <p>Data tidak tersedia.</p>
+</div>
+<?php endif; ?>
 
 				</div>
 					</div>

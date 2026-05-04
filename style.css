@@ -1,4 +1,4 @@
-/* Style untuk RatingUMS - Daftar Tenaga Kependidikan */
+﻿/* Style untuk RatingUMS - Daftar Tenaga Kependidikan */
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -636,9 +636,115 @@ body {
         justify-content: center;
     }
 
+
     .export-btn {
         flex: 1;
         justify-content: center;
         min-width: 130px;
     }
+}
+
+/* ── Floating Sidebar Icons ─────────────────────────────────────── */
+.floating-sidebar {
+    position: fixed;
+    right: 18px;
+    bottom: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+}
+
+.float-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    position: relative;
+}
+
+.float-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+
+.float-btn::before {
+    content: attr(data-tip);
+    position: absolute;
+    right: 60px;
+    background: rgba(20,20,20,0.82);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.70em;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.float-btn:hover::before {
+    opacity: 1;
+}
+
+.float-btn-rating {
+    background: linear-gradient(135deg, #ffa600, #ff7b00);
+    animation: pulse-star 2.5s infinite;
+}
+
+@keyframes pulse-star {
+    0%, 100% { box-shadow: 0 4px 16px rgba(255,166,0,0.4); }
+    50%       { box-shadow: 0 4px 26px rgba(255,166,0,0.75); }
+}
+
+.float-btn-home {
+    background: linear-gradient(135deg, #073c64, #0a5f9e);
+}
+
+.float-btn-top {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    position: fixed;
+    right: 18px;
+    bottom: 25px;
+    z-index: 9999;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+    cursor: pointer;
+    border: none;
+    transition: transform 0.25s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.float-btn-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.float-btn-top:hover {
+    transform: scale(1.12);
+}
+
+@media (max-width: 600px) {
+    .floating-sidebar { right: 10px; bottom: 75px; }
+    .float-btn { width: 44px; height: 44px; font-size: 1.15em; }
+    .float-btn-top { right: 10px; bottom: 18px; width: 44px; height: 44px; font-size: 1.15em; }
 }

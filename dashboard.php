@@ -1,4 +1,5 @@
 <?php
+session_start();
 include 'config.php';
 
 // Daftar kata-kata tidak pantas
@@ -88,7 +89,8 @@ while ($row = $result->fetch_assoc()) {
         <h1>DAFTAR TENAGA KEPENDIDIKAN FKIP</h1>
     </div>
 
-    <!-- Export Section -->
+    <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true): ?>
+    <!-- Export Section (hanya tampil untuk admin) -->
     <div class="export-section">
         <div class="export-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -105,6 +107,7 @@ while ($row = $result->fetch_assoc()) {
             </button>
         </div>
     </div>
+    <?php endif; ?>
 
     <?php if (isset($success_message)): ?>
         <div class="message success"><?php echo $success_message; ?></div>
@@ -325,6 +328,6 @@ while ($row = $result->fetch_assoc()) {
                 });
             });
         });
-    </script>
+    </script><?php include 'footer.php'; ?>
 </body>
 </html>

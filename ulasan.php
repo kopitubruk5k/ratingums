@@ -1,5 +1,13 @@
 <?php
+session_start();
 include 'config.php';
+$is_admin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+
+// Blokir akses export jika bukan admin
+if (isset($_GET['export']) && !$is_admin) {
+    header("Location: index.php");
+    exit();
+}
 
 // Helper: display star characters
 function exportStars($rating) {
@@ -260,11 +268,13 @@ function displayStars($rating) {
             <button type="submit">Terapkan</button>
         </form>
 
+        <?php if ($is_admin): ?>
         <div class="export-buttons">
             <a href="ulasan.php?export=csv" class="export-btn export-csv">📄 Export CSV</a>
             <a href="ulasan.php?export=excel" class="export-btn export-excel">📊 Export Excel</a>
             <a href="ulasan.php?export=pdf" class="export-btn export-pdf">🖨️ Export PDF</a>
         </div>
+        <?php endif; ?>
     </div>
 
     <div class="reviews-container">
@@ -280,7 +290,10 @@ function displayStars($rating) {
                         </div>
                         <div class="review-rating"><?php echo displayStars($review['rating']); ?> (<?php echo $review['rating']; ?>/5)</div>
                     </div>
-                    <div class="review-author"><?php echo htmlspecialchars($review['nama_reviewer']); ?></div>
+                    <div class="review-author" style="display:flex;align-items:center;gap:6px;">
+                        🙍 Pengguna Anonim
+                        <span style="background:#f0f4ff;border:1px solid #c7d4ff;color:#667eea;font-size:0.75em;padding:2px 8px;border-radius:20px;font-weight:500;cursor:help;" title="Nama reviewer disembunyikan untuk menjaga privasi">🔒 Privasi</span>
+                    </div>
                     <div class="review-comment"><?php echo htmlspecialchars($review['komentar']); ?></div>
                     <small><?php echo date('d M Y H:i', strtotime($review['tanggal'])); ?></small>
                 </div>
@@ -294,6 +307,7 @@ function displayStars($rating) {
         <a href="dashboard.php" class="back-link">Kembali ke Daftar</a>
     </div>
 
+    <?php if ($is_admin): ?>
     <div class="bottom-links">
         <div class="link-box">
             <a href="sdmrendah.php" class="sdm-link">Ulasan SDM Rendah</a>
@@ -302,7 +316,9 @@ function displayStars($rating) {
             <a href="panel.php" class="sdm-link" style="background-color: #073c64;">⚙️ Panel Admin</a>
         </div>
     </div>
+    <?php endif; ?>
 
     <?php closeConnection(); ?>
+<?php include 'footer.php'; ?>
 </body>
 </html>

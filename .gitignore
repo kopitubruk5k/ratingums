@@ -1,0 +1,38 @@
+# ========================
+# Konfigurasi & Kredensial
+# ========================
+config.php
+
+# ========================
+# File Deploy & Arsip
+# ========================
+*.zip
+*.tar.gz
+*.rar
+
+# ========================
+# File Upload (opsional, uncomment jika tidak ingin push foto)
+# ========================
+# img/staff_*
+
+# ========================
+# Editor & OS
+# ========================
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Temporary & Log Files
+# ========================
+*.log
+*.tmp
+*.bak
+/tmp/
+
+# ========================
+# PHP Debug & Utility
+# ========================
+db_alter.php

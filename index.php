@@ -1,9 +1,31 @@
 <?php
 include 'config.php';
 
-// Query untuk mengambil semua tenaga kependidikan
-$query = "SELECT * FROM tenaga_kependidikan ORDER BY id ASC";
+// Query untuk mengambil semua tenaga kependidikan beserta rata-rata rating
+$check_col = $conn->query("SHOW COLUMNS FROM tenaga_kependidikan LIKE 'urutan'");
+$order_by = ($check_col && $check_col->num_rows > 0) ? "tk.urutan ASC, tk.id ASC" : "tk.id ASC";
+
+$query = "
+    SELECT tk.*,
+           COALESCE(AVG(u.rating), 0) as avg_rating,
+           COUNT(u.id) as total_ulasan
+    FROM tenaga_kependidikan tk
+    LEFT JOIN ulasan u ON u.tenaga_id = tk.id
+    GROUP BY tk.id
+    ORDER BY $order_by
+";
 $result = $conn->query($query);
+
+function displayStars($rating) {
+    $rounded = round($rating);
+    $stars = '';
+    for ($i = 1; $i <= 5; $i++) {
+        $stars .= ($i <= $rounded)
+            ? '<span class="star-filled">★</span>'
+            : '<span class="star-empty">☆</span>';
+    }
+    return $stars;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id-ID">
@@ -183,6 +205,24 @@ body{
     transform:translateY(-2px);
     box-shadow:0 5px 15px rgba(7,60,100,0.3);
 }
+.staff-rating{
+    margin-top:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.star-filled{
+    color:#ffa600;
+    font-size:1.1em;
+}
+.star-empty{
+    color:#ddd;
+    font-size:1.1em;
+}
+.rating-text{
+    font-size:0.82em;
+    color:#888;
+}
 
 @media(max-width:768px){
     .staff-grid{grid-template-columns:1fr;}
@@ -236,6 +276,17 @@ body{
                             <?php if (!empty($staff['email'])): ?>
                                 <?php echo htmlspecialchars($staff['email']); ?>
                             <?php endif; ?>
+                            <div class="staff-rating">
+                                <?php echo displayStars($staff['avg_rating']); ?>
+                                <span class="rating-text">
+                                    <?php if ($staff['total_ulasan'] > 0): ?>
+                                        <?php echo number_format($staff['avg_rating'], 1); ?>/5
+                                        (<?php echo $staff['total_ulasan']; ?> ulasan)
+                                    <?php else: ?>
+                                        Belum ada ulasan
+                                    <?php endif; ?>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -250,5 +301,7 @@ body{
 </div>
 
 <?php closeConnection(); ?>
+
+<?php include 'footer.php'; ?>
 </body>
 </html>

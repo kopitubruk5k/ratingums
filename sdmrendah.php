@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_check.php';
 include 'config.php';
 
 // Handle Excel export
@@ -216,6 +217,6 @@ function displayStars($rating) {
         </div>
     </div>
 
-    <?php closeConnection(); ?>
+    <?php closeConnection(); ?><?php include 'footer.php'; ?>
 </body>
 </html>
